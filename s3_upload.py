@@ -36,18 +36,6 @@ def download_webp(url: str, imgName: str) -> str:
 import posixpath
 
 def upload_image_to_s3(file_path: str, member_id: str, date: Optional[str] = None, is_profile: bool = True) -> Optional[str]:
-    """
-    S3에 파일을 업로드하는 함수
-
-    Args:
-        file_path (str): 업로드할 파일의 경로
-        member_id (str): 사용자 ID
-        date (str, optional): 웹툰 이미지의 날짜 (웹툰 이미지 업로드 시 사용)
-        is_profile (bool): 프로필 이미지인지 여부 (True: 프로필 이미지, False: 웹툰 이미지)
-
-    Returns:
-        str: 업로드된 S3 객체의 URL
-    """
     if not BUCKET_NAME:
         logging.error("BUCKET_NAME is not set. Cannot upload to S3.")
         return None
