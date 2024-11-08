@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 import posixpath
 import re
 
+
 # 로컬 개발 환경에서만 .env 파일을 로드
 dotenv_path = 'keys.env'
 if os.path.exists(dotenv_path):
@@ -22,6 +23,9 @@ else:
     logging.info(f".env 파일({dotenv_path})이 존재하지 않습니다. 환경 변수를 직접 설정합니다.")
 
 app = FastAPI()
+
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
 
 # 로깅 설정
 logging.basicConfig(
@@ -178,13 +182,12 @@ def process_profile_background(memberId: str, file_path: str, characterStyle: st
 
         # 결과 데이터 준비
         result_data = {
-            "memberId": memberId,
-            "characterInfo": characterStyle,
+            "memberId": sanitize_member_id(memberId),
+            "characterInfo": gpt,
             "characterStyle": "romance",
             "seedNum": seed,
             "characterProfileImageUrl": s3_url
         }
-        print(result_data)
         try:
             response = requests.post("http://localhost:8080/api/v1/webhook/ai/character", json=result_data)
             if response.status_code == 200:
@@ -299,4 +302,4 @@ async def process_webtoon(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=5000)
+    uvicorn.run(app, host="0.0.0.0", port=5000, log_level="info")
