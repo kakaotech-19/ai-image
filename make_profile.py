@@ -42,7 +42,7 @@ def create_profile(model_type, version_type, info_profile):
             "prompt_strength": 0.8,
             "extra_lora_scale": 1,
             "num_inference_steps": 28,
-            "prompt": f"{info_profile}\n" + "a character of the upper body facing the front(clothes: white T-shirt)"
+            "prompt": f"{info_profile}\n" + "a character of the upper body facing the front."
         }
     prediction = replicate.predictions.create(
         version=version,
