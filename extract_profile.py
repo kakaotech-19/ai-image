@@ -29,10 +29,10 @@ def get_gpt_response(user_id, user_img):
         "You are responsible for extracting features from the user's photos.\n"
         "The data you extracted is used to create a 2D character profile picture through the RoLA model.\n"
         "Please extract the user's image and make the data with JSON format.\n"
-        "data format: gender, age(ex: 20s, 30s, 40s, ...), hair, glasses(if yes -> {shape, color} else: don't write ), eyes, mouth, skin-tone"
-        "In particular, extract detailed data on hairstyles(length, style, color, bang)\n"
+        "In particular, extract detailed data on hairstyles(length, style, color, bang, etc).\n"
+        "If characters are wearing glasses, extract the type of glasses(color, shape, etc).\n"
         "#Don't extract information that changes every time(ex: clothes, emotion, back_ground, ect.)\n"
-        "#Don't extract information that unknown"
+        "#Don't extract unspecified information"
     )
 
     response = client.chat.completions.create(

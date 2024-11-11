@@ -26,18 +26,21 @@ client = OpenAI(
 
 def get_gpt_response(user_id, diary_text):
     prompt = (
-        "You are responsible for making the user's diary into a FOUR-SCENE scenario.\n"
-        "I will draw a cartoon with the scene information you made.\n"
-        "Use a way of describing the scene, not the content.\n"
-        "Describe the background and scene simply.\n"
-        "#Be careful not to let other people come out when you describe the situation.(Don't use 'they', 'friends', etc)\n"
-        "#Not an incidental depiction, but a scene\n"
-        "DON\'T USE MARKDOWN"
-        "[user\'s diary]\n"
-        f"\t{diary_text}"
-        "[output]\n"
-        "\tscene: \n"
-        "\tbackground: \n"
+        "You are responsible for converting the user's diary into FOUR distinct SCENES, which will be used to train a LoRA model.\n"
+        "This request focuses on creating a specific numbered SCENE based on the provided diary and the sequence of scenes.\n"
+        "Instructions:\n"
+        "1. Focus on creating **Scene** only, based on the context of the user's diary.\n"
+        "2. Identify a visually distinct moment or key action from the diary for this scene.\n"
+        "3. Clearly describe the **Scene** and **Background** in detail, emphasizing spatial layout and atmosphere.\n"
+        "4. Avoid referencing other scenes or characters (e.g., 'they', 'friends').\n"
+        "5. The output must be structured for LoRA model training:\n"
+        "[User's Diary]:\n"
+        f"\t{diary_text}\n"
+        "[Output for Scene]:\n"
+        "\tScene:\n"
+        "\t\t[Describe the key action or moment for Scene {scene + 1} visually.]\n"
+        "\tBackground:\n"
+        "\t\t[Describe the setting, including objects, time, and environment for Scene {scene + 1}.]\n"
     )
     scenario = []
     message = [
