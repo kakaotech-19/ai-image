@@ -242,7 +242,7 @@ def process_webtoon_background(memberId: str, date: str, content: str, character
             "webtoonImages": results
         }
         try:
-            response = requests.post("http://localhost:8080/api/v1/webhook/ai/webtoon", json=result_data)
+            response = requests.post("http://backend:8080/api/v1/webhook/ai/webtoon", json=result_data)
             if response.status_code == 200:
                 logging.info("Webtoon data successfully posted")
             else:
