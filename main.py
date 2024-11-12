@@ -189,7 +189,7 @@ def process_profile_background(memberId: str, file_path: str, characterStyle: st
             "characterProfileImageUrl": s3_url
         }
         try:
-            response = requests.post("http://localhost:8080/api/v1/webhook/ai/character", json=result_data)
+            response = requests.post("http://backend:8080/api/v1/webhook/ai/character", json=result_data)
             if response.status_code == 200:
                 logging.info("Profile data successfully posted")
             else:
