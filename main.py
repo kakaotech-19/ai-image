@@ -189,7 +189,7 @@ def process_profile_background(memberId: str, file_path: str, characterStyle: st
             "characterProfileImageUrl": s3_url
         }
         try:
-            response = requests.post("http://localhost:8080/api/v1/webhook/ai/character", json=result_data)
+            response = requests.post("http://backend:8080/api/v1/webhook/ai/character", json=result_data)
             if response.status_code == 200:
                 logging.info("Profile data successfully posted")
             else:
@@ -302,4 +302,4 @@ async def process_webtoon(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=5001, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=5000, log_level="info")
