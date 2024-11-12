@@ -218,7 +218,7 @@ def process_webtoon_background(memberId: str, date: str, content: str, character
                 logging.info(f"Processing image {j} for scenario {i}: {image_url}")
 
                 # 이미지 다운로드
-                local_image_path = download_webp(image_url, f"webtoon_{memberId}_{i+1}")
+                local_image_path = download_webp(image_url, f"{i+1}")
                 if local_image_path:
                     # S3에 이미지 업로드 (memberId를 문자열로 변환)
                     logging.info(f"Uploading webtoon image: {local_image_path} for memberId: {memberId}")
@@ -302,4 +302,4 @@ async def process_webtoon(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=5000, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=5001, log_level="info")
