@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import logging
 
 # 로컬 개발 환경에서만 .env 파일을 로드
-dotenv_path = 'keys.env'
+dotenv_path = '.env'
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path=dotenv_path)
     logging.info(f".env 파일({dotenv_path})을 성공적으로 로드했습니다.")
