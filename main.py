@@ -15,7 +15,7 @@ import re
 
 
 # 로컬 개발 환경에서만 .env 파일을 로드
-dotenv_path = 'keys.env'
+dotenv_path = '.env'
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path=dotenv_path)
     logging.info(f".env 파일({dotenv_path})을 성공적으로 로드했습니다.")
@@ -38,8 +38,9 @@ logging.basicConfig(
 )
 
 # 환경 변수 로드
-model_type = "tpals0409/romance-webtoon-character"
-version_type = "64ad94c7f1fe7cfe73ee7b3d0f7deae8a59d201689eb12d07f74baa9325949e0"
+models = dict()
+models['romance'] = ["tpals0409/romance-webtoon-character", "64ad94c7f1fe7cfe73ee7b3d0f7deae8a59d201689eb12d07f74baa9325949e0"]
+models['pixar'] = ["tpals0409/test_pixar", "32c27ef90bb8b1b2c272809059306a6ecc3e7b903b694857fefa0175d7726ca6"]
 
 # 업로드할 파일 경로
 UPLOAD_FOLDER = './uploads'
@@ -92,7 +93,7 @@ def upload_image_to_s3(file_path: str, member_id: str, date: Optional[str] = Non
     # S3에 저장할 객체 이름 설정 (posixpath 사용)
     if is_profile:
         # 프로필 이미지의 경우, 'profile_leo.webp'로 명명
-        filename = f"profile_{member_id}.webp"
+        filename = f"temp_profile.webp"
         object_name = posixpath.join(DEFAULT_PATH, member_id, filename)
     elif date:
         # 웹툰 이미지의 경우, 날짜 폴더 안에 저장
@@ -135,6 +136,9 @@ def download_webp(url: str, imgName: str) -> Optional[str]:
         return None
 
 def process_profile_background(memberId: str, file_path: str, characterStyle: str):
+    model_type = models[characterStyle][0]
+    version_type = models[characterStyle][1]
+
     try:
         logging.info(f"Processing profile for memberId: {memberId}")
         # 이미지 Base64 인코딩
@@ -161,7 +165,7 @@ def process_profile_background(memberId: str, file_path: str, characterStyle: st
             return
 
         # 이미지 URL을 로컬에 다운로드
-        local_image_path = download_webp(image_url, f"profile_{memberId}")
+        local_image_path = download_webp(image_url, f"temp_profile")
         if not local_image_path:
             logging.error(f"Failed to download profile image from URL: {image_url}")
             return
@@ -189,7 +193,7 @@ def process_profile_background(memberId: str, file_path: str, characterStyle: st
             "characterProfileImageUrl": s3_url
         }
         try:
-            response = requests.post("http://backend:8080/api/v1/webhook/ai/character", json=result_data)
+            response = requests.post("http://localhost:8080/api/v1/webhook/ai/character", json=result_data)
             if response.status_code == 200:
                 logging.info("Profile data successfully posted")
             else:
@@ -206,11 +210,12 @@ def process_webtoon_background(memberId: str, date: str, content: str, character
         # 시나리오 생성
         user_id_response, scenario = make_scenario.get_gpt_response(memberId, content)
         logging.info(f"Scenario: {scenario}")
-
+        model_type = models[characterStyle][0]
+        version_type = models[characterStyle][1]
         results = []
         for i, scene in enumerate(scenario):
             logging.info(f"Processing scenario {i}: {scene}")
-            image_urls = make_webtoon.create_webtoon(memberId, characterInfo, seedNum, scene)
+            image_urls = make_webtoon.create_webtoon(memberId, characterInfo, seedNum, scene, model_type, version_type)
             logging.info(f"Webtoon images created: {image_urls}")
 
             # image_urls는 리스트라고 가정합니다.
@@ -242,7 +247,7 @@ def process_webtoon_background(memberId: str, date: str, content: str, character
             "webtoonImages": results
         }
         try:
-            response = requests.post("http://backend:8080/api/v1/webhook/ai/webtoon", json=result_data)
+            response = requests.post("http://localhost:8080/api/v1/webhook/ai/webtoon", json=result_data)
             if response.status_code == 200:
                 logging.info("Webtoon data successfully posted")
             else:
@@ -302,4 +307,6 @@ async def process_webtoon(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=5000, log_level="info")
+    host = os.getenv("HOST", "0.0.0.0")
+    port = int(os.getenv("PORT", 5001))
+    uvicorn.run(app, host=host, port=port, log_level="info")

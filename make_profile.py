@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 
 # 로컬 개발 환경에서만 .env 파일을 로드
-dotenv_path = 'keys.env'
+dotenv_path = '.env'
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path=dotenv_path)
     logging.info(f".env 파일({dotenv_path})을 성공적으로 로드했습니다.")
@@ -25,8 +25,10 @@ if not REPLICATE_API_TOKEN:
 os.environ["REPLICATE_API_TOKEN"] = REPLICATE_API_TOKEN
 
 # 모델 및 버전 가져오기
-model_type = "tpals0409/romance-webtoon-character"
-version_type = "64ad94c7f1fe7cfe73ee7b3d0f7deae8a59d201689eb12d07f74baa9325949e0"
+models = dict()
+models['romance'] = ["tpals0409/romance-webtoon-character", "64ad94c7f1fe7cfe73ee7b3d0f7deae8a59d201689eb12d07f74baa9325949e0"]
+models['pixar'] = ["tpals0409/pixar-style", "f4cc445314637e21fcf76fd8330dbf6f2ffc178b10ae035db48c0e6f8c3f0acb"]
+
 
 # 예측 생성
 def create_profile(model_type, version_type, info_profile):
