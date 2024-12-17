@@ -135,7 +135,7 @@ def download_webp(url: str, imgName: str) -> Optional[str]:
         logging.error(f"Error downloading file from {url}: {type(e).__name__}: {e}")
         return None
 
-def process_profile_background(memberId: str, file_path: str, characterStyle: str):
+def process_profile_background(memberId: str, file_path: str, characterStyle: str, apiDomainUrl: str):
     model_type = models[characterStyle][0]
     version_type = models[characterStyle][1]
 
@@ -193,7 +193,9 @@ def process_profile_background(memberId: str, file_path: str, characterStyle: st
             "characterProfileImageUrl": s3_url
         }
         try:
-            response = requests.post("http://localhost:8080/api/v1/webhook/ai/character", json=result_data)
+            webhook_url = f"http://{apiDomainUrl}/api/v1/webhook/ai/character"  # 수정된 부분
+            response = requests.post(webhook_url, json=result_data)  # 수정된 부분
+            # response = requests.post(f"http://localhost:8080/api/v1/webhook/ai/character", json=result_data)
             if response.status_code == 200:
                 logging.info("Profile data successfully posted")
             else:
@@ -204,7 +206,7 @@ def process_profile_background(memberId: str, file_path: str, characterStyle: st
     except Exception as e:
         logging.error(f"Error in process_profile_background: {e}")
 
-def process_webtoon_background(memberId: str, date: str, content: str, characterInfo: str, seedNum: int, characterStyle: str):
+def process_webtoon_background(memberId: str, date: str, content: str, characterInfo: str, seedNum: int, characterStyle: str, apiDomainUrl: str):
     try:
         logging.info(f"Processing webtoon for memberId: {memberId}, date: {date}")
         # 시나리오 생성
@@ -247,7 +249,9 @@ def process_webtoon_background(memberId: str, date: str, content: str, character
             "webtoonImages": results
         }
         try:
-            response = requests.post("http://localhost:8080/api/v1/webhook/ai/webtoon", json=result_data)
+            webhook_url = f"http://{apiDomainUrl}/api/v1/webhook/ai/webtoon"  # 수정된 부분
+            response = requests.post(webhook_url, json=result_data)  # 수정된 부분
+            # response = requests.post("http://localhost:8080/api/v1/webhook/ai/webtoon", json=result_data)
             if response.status_code == 200:
                 logging.info("Webtoon data successfully posted")
             else:
@@ -263,6 +267,7 @@ async def process_profile(
     memberId: str = Form(...),
     characterStyle: str = Form(...),
     userImage: UploadFile = File(...),
+    apiDomainUrl: str = Form(...),
     background_tasks: BackgroundTasks = None
 ):
     try:
@@ -274,7 +279,7 @@ async def process_profile(
         logging.info(f"File saved to {file_path}")
 
         # 백그라운드 작업 실행
-        background_tasks.add_task(process_profile_background, memberId, file_path, characterStyle)
+        background_tasks.add_task(process_profile_background, memberId, file_path, characterStyle, apiDomainUrl)
 
         return {"message": "Profile processing started"}
     except Exception as e:
@@ -289,6 +294,7 @@ async def process_webtoon(
     characterInfo: str = Body(...),
     seedNum: int = Body(...),
     characterStyle: str = Body(...),
+    apiDomainUrl: str = Body(...),
     background_tasks: BackgroundTasks = None
 ):
     try:
@@ -298,7 +304,7 @@ async def process_webtoon(
                      f"characterInfo={characterInfo}, seedNum={seedNum}, characterStyle={characterStyle}")
 
         # 백그라운드 작업 실행
-        background_tasks.add_task(process_webtoon_background, memberId, date, content, characterInfo, seedNum, characterStyle)
+        background_tasks.add_task(process_webtoon_background, memberId, date, content, characterInfo, seedNum, characterStyle, apiDomainUrl)
 
         return {"message": "Webtoon processing started"}
     except Exception as e:
